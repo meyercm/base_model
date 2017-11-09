@@ -1,28 +1,43 @@
 defmodule BaseModel.Mixfile do
   use Mix.Project
 
+  @version "0.1.0"
+  @repo_url "https://github.com/meyercm/base_model"
+
   def project do
     [
       app: :base_model,
-      version: "0.1.0",
-      elixir: "~> 1.5",
+      version: @version,
+      elixir: "~> 1.0",
       start_permanent: Mix.env == :prod,
-      deps: deps()
+      deps: deps(),
+      # Hex
+      package: hex_package(),
+      description: "ActiveRecord for Ecto",
+      # Docs
+      name: "BaseModel",
+      # Testing
+      preferred_cli_env: [espec: :test],
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
+  defp hex_package do
+    [maintainers: ["Chris Meyer"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => @repo_url}]
+  end
+
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
+      {:espec, "~> 1.4", only: :test},
+      {:ecto, "~> 2.1"},
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
     ]
   end
 end
