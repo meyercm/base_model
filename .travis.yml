@@ -1,6 +1,9 @@
 language:
   elixir
 
+services:
+  - postgresql
+
 matrix:
   include:
     - otp_release: 19.2
