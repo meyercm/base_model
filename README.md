@@ -4,7 +4,7 @@ ActiveRecord for Ecto.
 
 [![Build Status](https://travis-ci.org/meyercm/base_model.svg?branch=master)](https://travis-ci.org/meyercm/base_model)
 
-`{:base_model, "~> 0.1.0"},`
+`{:base_model, "~> 0.2"},`
 
 `BaseModel` provides a straightforward `__using__` macro to include common CRUD
 functions in your models:
@@ -18,7 +18,7 @@ functions in your models:
 * `where(where_clause)`
 * `update(model, params)`
 * `update_where(where_clause, params)`
-* `delete(id)`
+* `delete(id_or_struct)`
 * `delete_where(where_clause)`
 * `delete_all`
 
@@ -103,7 +103,40 @@ iex> User.find(1, preload: :problems)
 
 ### Overriding `*_changeset` methods
 
-TODO
+From the `Problem` model in  [ExampleApp](https://github.com/meyercm/base_model/blob/master/examples/example_app/lib/models/problem.ex):
+
+```elixir
+# in problem.ex:
+schema "problems" do
+  field :description, :string
+  field :severity, :integer
+  belongs_to :user, User
+  timestamps()
+end
+
+@severities 1..5
+
+def create_changeset(params) do
+  %__MODULE__{}
+  |> cast(params, [:description, :severity, :user_id])
+  |> validate_inclusion(:severity, @severities)
+end
+
+def update_changeset(model, params) do
+  model
+  |> cast(params, [:description, :severity, :user_id])
+  |> validate_inclusion(:severity, @severities)
+end
+```
+
+The BaseModel method `create` will first extract association fields from your
+params, then pass them to `create_changeset/1`.  By overriding it as we have
+here, custom validations can be applied, e.g. here, we've restricted severity
+to be in 1..5.
+
+Likewise, `update` will call `update_changeset`, and use the resulting changeset
+in it's call to `Repo.update.`
+
 
 ### Closing comments
 

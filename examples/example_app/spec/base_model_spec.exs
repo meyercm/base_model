@@ -59,8 +59,17 @@ defmodule BaseModelSpec do
       User.find(id, preload: :problems) |> should(match_pattern %User{name: "bob", problems: [problem]})
     end
 
-    it "returns {:error, reason} if it fails"
-    it "allows overriding validation"
+    it "allows overriding validation"  do
+      {:ok, a} = User.create(name: "a") #required
+      Problem.create(severity: 1, user: a) |> should(match_pattern {:ok, %Problem{}})
+      Problem.create(severity: -1, user: a) |> should(match_pattern {:error, _reason})
+    end
+
+    it "returns {:error, reason} if validation fails" do
+      {:ok, a} = User.create(name: "a") #required
+      Problem.create(severity: 1, user: a) |> should(match_pattern {:ok, %Problem{}})
+      Problem.create(severity: -1, user: a) |> should(match_pattern {:error, _reason})
+    end
   end
 
   describe "find" do
@@ -73,11 +82,14 @@ defmodule BaseModelSpec do
       User.find(id) |> should(match_pattern(%User{name: "test_find"}))
     end
 
-    xit "can accept a list of pks" do
-      {:ok, ~M{id}} = User.create(name: "test_find")
-      {:ok, %{id: id2}} = User.create(name: "test_find2")
-      User.find([id, id2]) |> should(match_pattern([%User{name: "test_find"}, %User{name: "test_find2"}]))
-    end
+    # Maybe don't add this behavior, as it would completely screw anyone with
+    # compound keys.  Though, maybe we don't care? how common is a compound PK?
+
+    # it "can accept a list of pks" do
+    #   {:ok, ~M{id}} = User.create(name: "test_find")
+    #   {:ok, %{id: id2}} = User.create(name: "test_find2")
+    #   User.find([id, id2]) |> should(match_pattern([%User{name: "test_find"}, %User{name: "test_find2"}]))
+    # end
   end
 
   describe "where(where_clause, opts)" do
@@ -172,7 +184,11 @@ defmodule BaseModelSpec do
       Problem.count(user: b) |> should(eq 1)
     end
 
-    it "allows overriding validation"
+    it "allows overriding validation" do
+      {:ok, a} = User.create(name: "a") #required
+      {:ok, problem} = Problem.create(severity: 1, user: a)
+      Problem.update(problem, severity: -1) |> should(match_pattern {:error, reason})
+    end
   end
 
   describe "update_where(where_clause, update_map)" do
@@ -220,6 +236,11 @@ defmodule BaseModelSpec do
 
     it "returns {:error, reason} if there was a problem" do
       User.delete(1) |> should(eq {:error, :not_found})
+    end
+
+    it "accepts a model" do
+      {:ok, user} = User.create(name: "a")
+      User.delete(user) |> should(eq :ok)
     end
   end
 
