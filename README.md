@@ -13,6 +13,8 @@ functions in your models:
 * `all()`
 * `count(where_clause \\ :anything)`
 * `find(id)`
+* `first(where_clause)`
+* `first_or_create(where_clause)`
 * `where(where_clause)`
 * `update(model, params)`
 * `update_where(where_clause, params)`
