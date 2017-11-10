@@ -1,21 +1,8 @@
-# BaseModel
+## BaseModel
 
-**TODO: Add description**
+ActiveRecord for Ecto.
 
-## Installation
+`{:base_model, "~> 0.1.0"}`
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `base_model` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:base_model, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/base_model](https://hexdocs.pm/base_model).
-
+`BaseModel` provides a straightforward `__using__` macro to include commonly
+used functions for all your models

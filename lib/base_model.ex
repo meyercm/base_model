@@ -62,7 +62,6 @@ defmodule BaseModel do
       def find(id, opts \\ []), do: BMF.find(@__repo_mod, id, opts)
 
       @doc """
-
       Returns a list of #{@__doc_module}s that match the where clause, subject
       to the limitations of `opts`
 
@@ -74,7 +73,6 @@ defmodule BaseModel do
       def where(where_clause, opts \\ []), do: BMF.where(@__repo_mod, where_clause, opts)
 
       @doc """
-
       Counts the number of #{@__doc_module}s that match the where clause
       (default is all). Where clause may be a Keyword list or a Map.
 
@@ -86,9 +84,7 @@ defmodule BaseModel do
       """
       def count(where_clause \\ []), do: BMF.count(@__repo_mod, where_clause)
 
-
       @doc """
-
       Deletes a #{@__doc_module} by primary key.
       returns
 
@@ -96,7 +92,6 @@ defmodule BaseModel do
       ```elixir
       iex> #{@__doc_module}.delete(1)
       ```
-
       """
       def delete(id), do: BMF.delete(@__repo_mod, id)
 
@@ -115,7 +110,7 @@ defmodule BaseModel do
 
       Returns {:ok, count} if successful.
       """
-      def delete_all(), do: BMF.delete_all(@__repo_mod)
+      def delete_all, do: BMF.delete_all(@__repo_mod)
 
       @doc """
       Updates a model's fields as set in `params`.  Accepts a #{@__doc_module}

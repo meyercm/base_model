@@ -5,29 +5,16 @@ defmodule BaseModel.Functions do
   alias Ecto.{Query, Changeset, Association.BelongsTo}
 
   def all({repo, model}, opts) do
-    query = case Keyword.get(opts, :order_by) do
-      nil -> model
-      order_by -> model |> Query.order_by(^order_by)
-    end
-    repo.all(query)
+    model
+    |> add_opts(opts, [:order_by, :preload])
+    |> repo.all
   end
 
-  def create(repo_mod, args) when is_list(args), do: create(repo_mod, Enum.into(args, %{}))
-  def create({repo, model}, args) do
-    assoc_fields = model.__schema__(:associations)
-
-    # This section handles populating foreign keys for `:belongs_to` associations
-    new_args =
-      for {field, value} <- args do
-        case model.__schema__(:association, field) do
-          ~M{%BelongsTo owner_key, related_key} ->
-            {owner_key, Map.get(value, related_key)}
-          _ -> nil
-        end
-      end |> Enum.reject(&is_nil/1) |> Map.new
-    args = Map.merge(args, new_args)
-    changeset = model.create_changeset(args)
-    repo.insert(changeset)
+  def create({repo, model}, params) do
+    params
+    |> fix_params_assoc(model)
+    |> model.create_changeset
+    |> repo.insert
   end
 
   def find({repo, model}, id, opts) do
@@ -39,6 +26,7 @@ defmodule BaseModel.Functions do
   end
 
   def where({repo, model}, where_clause, opts) do
+    where_clause = fix_where_assoc(where_clause, model)
     model
     |> Query.where(^where_clause)
     |> add_opts(opts, [:order_by, :limit, :preload])
@@ -46,6 +34,7 @@ defmodule BaseModel.Functions do
   end
 
   def count({repo, model}, where_clause) do
+    where_clause = fix_where_assoc(where_clause, model)
     model
     |> Query.where(^where_clause)
     |> Query.select([], count(1))
@@ -61,6 +50,7 @@ defmodule BaseModel.Functions do
   end
 
   def delete_where({repo, model}, where_clause) do
+    where_clause = fix_where_assoc(where_clause, model)
     model
     |> Query.where(^where_clause)
     |> repo.delete_all
@@ -77,18 +67,15 @@ defmodule BaseModel.Functions do
     end
   end
 
-  def update(repo_mod, model_struct, param_list) when is_list(param_list) do
-    update(repo_mod, model_struct, Enum.into(param_list, %{}))
-  end
   def update({repo, model}, model_struct, params) do
+    params = fix_params_assoc(params, model)
     model.update_changeset(model_struct, params)
     |> repo.update()
   end
 
-  def update_where(repo_mod, where_clause, param_map) when is_map(param_map) do
-    update_where(repo_mod, where_clause, Map.to_list(param_map))
-  end
   def update_where({repo, model}, where_clause, params) do
+    where_clause = fix_where_assoc(where_clause, model)
+    params = fix_params_assoc(params, model) |> Map.to_list
     model
     |> Query.where(^where_clause)
     |> repo.update_all(set: params)
@@ -121,4 +108,20 @@ defmodule BaseModel.Functions do
   def apply_opt(query, :limit, limit), do: Query.limit(query, ^limit)
   def apply_opt(query, :preload, preload), do: Query.preload(query, ^preload)
 
+  def fix_where_assoc(where_clause, model) do
+    for {field, value} <- where_clause do
+      case model.__schema__(:association, field) do
+        # only create keys for `belongs_to`, because this table has the foreign key
+        ~M{%BelongsTo owner_key, related_key} ->
+          {owner_key, Map.get(value, related_key)}
+        _ -> {field, value}
+      end
+    end
+  end
+
+  # params needs to be a map
+  def fix_params_assoc(params, model) do
+    fix_where_assoc(params, model)
+    |> Map.new
+  end
 end
