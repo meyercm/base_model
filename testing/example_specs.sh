@@ -1,7 +1,7 @@
 cd examples/example_app
 
 echo "
-use Mix.config
+use Mix.Config
 config :example_app, ExampleApp.Repo,
   username: \"postgres\",
   password: \"\"
