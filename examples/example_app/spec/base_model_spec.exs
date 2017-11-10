@@ -82,11 +82,14 @@ defmodule BaseModelSpec do
       User.find(id) |> should(match_pattern(%User{name: "test_find"}))
     end
 
-    xit "can accept a list of pks" do
-      {:ok, ~M{id}} = User.create(name: "test_find")
-      {:ok, %{id: id2}} = User.create(name: "test_find2")
-      User.find([id, id2]) |> should(match_pattern([%User{name: "test_find"}, %User{name: "test_find2"}]))
-    end
+    # Maybe don't add this behavior, as it would completely screw anyone with
+    # compound keys.  Though, maybe we don't care? how common is a compound PK?
+
+    # it "can accept a list of pks" do
+    #   {:ok, ~M{id}} = User.create(name: "test_find")
+    #   {:ok, %{id: id2}} = User.create(name: "test_find2")
+    #   User.find([id, id2]) |> should(match_pattern([%User{name: "test_find"}, %User{name: "test_find2"}]))
+    # end
   end
 
   describe "where(where_clause, opts)" do

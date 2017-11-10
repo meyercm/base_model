@@ -41,7 +41,7 @@ defmodule BaseModel.Functions do
     |> repo.one
   end
 
-  def delete({repo, model} = rm, %{__struct__: model} = struct) do
+  def delete({_repo, model} = rm, %{__struct__: model} = struct) do
     [pk] = model.__schema__(:primary_key)
     delete(rm, Map.fetch!(struct, pk))
   end
