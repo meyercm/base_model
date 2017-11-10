@@ -85,7 +85,7 @@ defmodule BaseModel do
       def count(where_clause \\ []), do: BMF.count(@__repo_mod, where_clause)
 
       @doc """
-      Deletes a #{@__doc_module} by primary key.
+      Deletes a #{@__doc_module} by primary key or by passing the model.
       returns
 
       ### Examples
@@ -93,7 +93,7 @@ defmodule BaseModel do
       iex> #{@__doc_module}.delete(1)
       ```
       """
-      def delete(id), do: BMF.delete(@__repo_mod, id)
+      def delete(id_or_model), do: BMF.delete(@__repo_mod, id_or_model)
 
       @doc """
       Deletes all #{@__doc_module}s matching the where clause.  Where clause may

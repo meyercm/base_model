@@ -41,6 +41,10 @@ defmodule BaseModel.Functions do
     |> repo.one
   end
 
+  def delete({repo, model} = rm, %{__struct__: model} = record) do
+    [pk] = model.__schema__(:primary_key)
+    delete(rm, Map.fetch!(record, pk))
+  end
   def delete({repo, model}, id) do
     [pk] = model.__schema__(:primary_key)
     case repo.delete_all(from x in model, where: field(x, ^pk) == ^id) do
