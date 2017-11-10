@@ -133,6 +133,26 @@ defmodule BaseModel do
       """
       def update_where(where_clause, params), do: BMF.update_where(@__repo_mod, where_clause, params)
 
+      @doc """
+      Returns the first record to match the where clause, or nil if no match
+
+      valid opts:
+      - order_by
+      - preload
+      """
+      def first(where_clause, opts \\ []), do: BMF.first(@__repo_mod, where_clause, opts)
+
+      @doc """
+      Queries for a record, and creates it if nothing matches the query
+
+      Returns the first record to match the where clause, or the newly created record
+
+      valid opts:
+      - order_by
+      - preload
+      """
+      def first_or_create(where_clause, opts \\ []), do: BMF.first_or_create(@__repo_mod, where_clause, opts)
+
       ####################################
       #  Overrideable Callback Functions
       ####################################

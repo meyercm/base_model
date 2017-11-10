@@ -88,6 +88,12 @@ defmodule BaseModelSpec do
       Problem.create(description: "problem for a", user: a)
     end
 
+    it "supports nil fields" do
+      User.create(name: "d")
+      User.where(age: nil)
+      |> should(match_pattern [%User{name: "d"}])
+    end
+
     it "returns a list of matching records" do
       User.where(age: 1) |> should(match_pattern [%User{name: "a", age: 1}])
     end
@@ -99,6 +105,10 @@ defmodule BaseModelSpec do
 
     it "allows specifying limit" do
       User.where([age: 2], limit: 1) |> should(match_pattern [%User{age: 2}])
+    end
+
+    it "supports order and limit together" do
+      User.where([age: 2], order_by: :name, limit: 1) |> should(match_pattern [%User{age: 2, name: "b"}])
     end
 
     it "supports :preload" do
@@ -126,7 +136,7 @@ defmodule BaseModelSpec do
 
     it "accepts associations in the query" do
       {:ok, a} = User.create(name: "a")
-      {:ok, b} = Problem.create(user: a, description: "b")
+      {:ok, _b} = Problem.create(user: a, description: "b")
       Problem.count(user: a) |> should(eq 1)
     end
 
@@ -184,7 +194,7 @@ defmodule BaseModelSpec do
     end
 
     it "allows using assoc in where and in update" do
-      [%{id: id1}=user1, %{id: id2}=user2] = User.where(name: "a")
+      [user1, user2] = User.where(name: "a")
       Problem.create(user: user1, description: "first problem")
       Problem.create(user: user1, description: "second problem")
       Problem.create(user: user2, description: "third problem")
@@ -237,7 +247,7 @@ defmodule BaseModelSpec do
       [b] = User.where(name: "b")
       Problem.create(user: b, description: "c")
       Problem.delete_where(user: b)
-      Problem.count |> should eq 0
+      Problem.count |> should(eq 0)
     end
   end
 
@@ -259,19 +269,76 @@ defmodule BaseModelSpec do
   end
 
   describe "first(where_clause, opts)" do
-    it "returns one matching row in the table"
-    it "supports :preload"
-    it "supports :order_by"
-    it "supports associations"
-    it "returns nil when no matches"
+    before do
+      {:ok, a} = User.create(name: "a", age: 1)
+      {:ok, _c} = User.create(name: "c", age: 2)
+      {:ok, b} = User.create(name: "b", age: 2)
+      Problem.create(user: a, description: "a_p")
+      Problem.create(user: b, description: "b_p1")
+      Problem.create(user: b, description: "b_p2")
+    end
+
+    it "returns one matching row in the table" do
+      User.first(age: 1)
+      |> should(match_pattern(%User{name: "a"}))
+    end
+
+    it "supports :preload" do
+      User.first([age: 1], preload: :problems)
+      |> should(match_pattern(%User{name: "a", problems: [%Problem{}]}))
+    end
+
+    it "supports :order_by" do
+      User.first([age: 2], order_by: :name)
+      |> should(match_pattern(%User{name: "b"}))
+      User.first([age: 2], order_by: [desc: :name])
+      |> should(match_pattern(%User{name: "c"}))
+    end
+
+    it "supports associations" do
+      [b] = User.where(name: "b")
+      Problem.first(user: b)
+      |> should(match_pattern(%Problem{}))
+    end
+
+    it "returns nil when no matches" do
+      Problem.first(description: "does not exist")
+      |> should(eq(nil))
+    end
   end
 
   describe "first_or_create(where_clause)" do
-    it "returns the first matching item if one exists"
-    it "supports :preload"
-    it "supports :order_by"
-    it "supports associations"
-    it "creates a new object if one does not exist"
+    before do
+      {:ok, a} = User.create(name: "a", age: 1)
+      Problem.create(description: "a_p", user: a)
+    end
+
+    it "returns the first matching item if one exists" do
+      User.first_or_create(name: "a")
+      |> should(match_pattern(%User{name: "a"}))
+      User.count |> should(eq 1)
+    end
+
+    it "supports :preload" do
+      User.first_or_create([name: "a"], preload: :problems)
+      |> should(match_pattern %User{problems: [%Problem{}]})
+    end
+
+    it "supports :order_by" do
+      User.create(name: "a", age: 2)
+      User.first_or_create([name: "a"], order_by: :age)
+      |> should(match_pattern %User{age: 1})
+      User.first_or_create([name: "a"], order_by: [desc: :age])
+      |> should(match_pattern %User{age: 2})
+    end
+    it "supports associations" do
+
+    end
+
+    it "creates a new object if one does not exist" do
+      User.first_or_create(name: "does not exist")
+      |> should(match_pattern(%User{name: "does not exist"}))
+    end
   end
 
 end

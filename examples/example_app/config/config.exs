@@ -10,7 +10,8 @@ config :example_app, ExampleApp.Repo,
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox,
   port: "5432",
-  loggers: []
+  loggers: [],
+  garbage_key: :ok
 
 
 import_config "secrets.exs"
