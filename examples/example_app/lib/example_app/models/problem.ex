@@ -21,7 +21,7 @@ defmodule ExampleApp.Models.Problem do
   def create_changeset(params) do
     %__MODULE__{}
     |> cast(params, [:description, :severity, :user_id])
-    |> validate_inclusion(:severity, @severities)
+    |> validate_inclusion(:severity, @allowed_severities)
   end
 
   def update_changeset(model, params) do
