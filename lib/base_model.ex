@@ -91,9 +91,11 @@ defmodule BaseModel do
       ### Examples
       ```elixir
       iex> #{@__doc_module}.delete(1)
+      ...> {:ok, struct} = #{@__doc_module}.create(params)
+      ...> #{@__doc_module}.delete(struct)
       ```
       """
-      def delete(id_or_model), do: BMF.delete(@__repo_mod, id_or_model)
+      def delete(id_or_struct), do: BMF.delete(@__repo_mod, id_or_struct)
 
       @doc """
       Deletes all #{@__doc_module}s matching the where clause.  Where clause may
