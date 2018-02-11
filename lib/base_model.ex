@@ -41,10 +41,10 @@ defmodule BaseModel do
   ```
   """
 
-  @type params :: map | Keyword.t
+  @type params :: map | Keyword.t()
   @type model :: map
-  @callback create_changeset(params) :: Ecto.Changeset.t
-  @callback update_changeset(model, params) :: Ecto.Changeset.t
+  @callback create_changeset(params) :: Ecto.Changeset.t()
+  @callback update_changeset(model, params) :: Ecto.Changeset.t()
 
   @doc """
 
@@ -56,15 +56,16 @@ defmodule BaseModel do
       # keep this short and sweet.
       alias BaseModel.Functions, as: BMF
       @__repo unquote(q_repo)
-      @__doc_module Module.split(__MODULE__) |> Enum.reverse |> hd
+      @__doc_module Module.split(__MODULE__) |> Enum.reverse() |> hd
       @__repo_mod {@__repo, __MODULE__}
 
       @behaviour BaseModel
       @type t :: %__MODULE__{}
-      @type opts :: Keyword.t
-      @type params :: map | Keyword.t
-      @type pk :: any # NOTE: find a way to make this dynamic, if possible.
-      @type where_clause :: Keyword.t
+      @type opts :: Keyword.t()
+      @type params :: map | Keyword.t()
+      # NOTE: find a way to make this dynamic, if possible.
+      @type pk :: any
+      @type where_clause :: Keyword.t()
       ###########################
       #  Inserted API Functions
       ###########################
@@ -154,7 +155,7 @@ defmodule BaseModel do
       ...> #{@__doc_module}.delete(struct)
       ```
       """
-      @spec delete(pk|t) :: :ok | {:error, any}
+      @spec delete(pk | t) :: :ok | {:error, any}
       def delete(id_or_struct), do: BMF.delete(@__repo_mod, id_or_struct)
 
       @doc """
@@ -197,7 +198,8 @@ defmodule BaseModel do
       not be used with untrusted inputs.
       """
       @spec update_where(where_clause, params) :: {:ok, non_neg_integer}
-      def update_where(where_clause, params), do: BMF.update_where(@__repo_mod, where_clause, params)
+      def update_where(where_clause, params),
+        do: BMF.update_where(@__repo_mod, where_clause, params)
 
       @doc """
       Returns the first record to match the where clause, or nil if no match
@@ -221,7 +223,8 @@ defmodule BaseModel do
       """
       @spec first_or_create(where_clause) :: t
       @spec first_or_create(where_clause, opts) :: t
-      def first_or_create(where_clause, opts \\ []), do: BMF.first_or_create(@__repo_mod, where_clause, opts)
+      def first_or_create(where_clause, opts \\ []),
+        do: BMF.first_or_create(@__repo_mod, where_clause, opts)
 
       ####################################
       #  Overrideable Callback Functions
@@ -232,33 +235,28 @@ defmodule BaseModel do
       @impl BaseModel
       def update_changeset(model, params), do: BMF.update_changeset(@__repo_mod, model, params)
 
-      defoverridable [
-        # override these to provide custom validation / data hygiene
-        create_changeset: 1,
-        update_changeset: 2,
+      defoverridable create_changeset: 1,
+                     # override these to provide custom validation / data hygiene
+                     update_changeset: 2,
 
-        # overriding these is not common, but supported. Good luck.
-        all: 0,
-        all: 1,
-        create: 1,
-        find: 1,
-        find: 2,
-        first: 1,
-        first: 2,
-        first_or_create: 1,
-        first_or_create: 2,
-        where: 1,
-        where: 2,
-        count: 0,
-        count: 1,
-        delete: 1,
-        delete_where: 1,
-        update: 2,
-        update_where: 2,
-
-      ]
-
+                     # overriding these is not common, but supported. Good luck.
+                     all: 0,
+                     all: 1,
+                     create: 1,
+                     find: 1,
+                     find: 2,
+                     first: 1,
+                     first: 2,
+                     first_or_create: 1,
+                     first_or_create: 2,
+                     where: 1,
+                     where: 2,
+                     count: 0,
+                     count: 1,
+                     delete: 1,
+                     delete_where: 1,
+                     update: 2,
+                     update_where: 2
     end
   end
-
 end
