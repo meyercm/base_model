@@ -23,13 +23,13 @@ functions in your models:
 * `delete_all`
 
 All of these are overridable, and where appropriate, support options including
-`:limit`, `:preload`, and `:order_by`.  Custom create and update validation is
+`:limit`, `:preload`, and `:order_by`. Custom create and update validation is
 possible by overriding `create_changeset/1` or `update_changeset/1` in the
 model.
 
 ### Example
 
-A model taken from the [example app](examples/example_app):
+A model taken from the [example app][example-app]:
 
 ```elixir
 defmodule ExampleApp.Models.User do
@@ -88,9 +88,9 @@ iex> {:ok, chris} = User.create(name: "chris")
 
 BaseModel methods support an optional `opts` parameter, which accepts 3 values:
 
-- `:preload`
-- `:limit`
-- `:order_by`
+* `:preload`
+* `:limit`
+* `:order_by`
 
 Each of these operates as a direct pass-thru to `Ecto`, so see their
 documentation on available use. Note that these opts are sensibly applied, e.g.
@@ -103,10 +103,10 @@ iex> User.find(1, preload: :problems)
 
 ### Overriding `*_changeset` methods
 
-From the `Problem` model in  [ExampleApp](https://github.com/meyercm/base_model/blob/master/examples/example_app/lib/models/problem.ex):
+From the `Problem` model in [ExampleApp][example-app]
 
 ```elixir
-# in problem.ex:
+# in models/problem.ex:
 schema "problems" do
   field :description, :string
   field :severity, :integer
@@ -116,12 +116,14 @@ end
 
 @severities 1..5
 
+@impl BaseModel
 def create_changeset(params) do
   %__MODULE__{}
   |> cast(params, [:description, :severity, :user_id])
   |> validate_inclusion(:severity, @severities)
 end
 
+@impl BaseModel
 def update_changeset(model, params) do
   model
   |> cast(params, [:description, :severity, :user_id])
@@ -130,23 +132,24 @@ end
 ```
 
 The BaseModel method `create` will first extract association fields from your
-params, then pass them to `create_changeset/1`.  By overriding it as we have
+params, then pass them to `create_changeset/1`. By overriding it as we have
 here, custom validations can be applied, e.g. here, we've restricted severity
 to be in 1..5.
 
 Likewise, `update` will call `update_changeset`, and use the resulting changeset
 in it's call to `Repo.update.`
 
-
 ### Closing comments
 
 I wrote the first version of `BaseModel` back when Elixir 0.13 was the new
 hotness and I was missing my old friend, ActiveRecord. I've found this query
 interface suitable for many use-cases, but as soon as I have a need for a more
-complicated query, I simply add it as a new method on the model.  This way, all
-of my Ecto code lives in the models, and in the models only.  The sanity gained
+complicated query, I simply add it as a new method on the model. This way, all
+of my Ecto code lives in the models, and in the models only. The sanity gained
 from not spreading Ecto calls directly into the business logic cannot be
 overstated.
 
 Please drop me a note if you end up using BaseModel in something cool, or file
 an issue if you have difficulty, bugs, or ideas for a better API.
+
+[example-app]: https://github.com/meyercm/base_model/tree/master/examples/example_app
