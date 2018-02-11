@@ -1,7 +1,7 @@
 defmodule BaseModel.Mixfile do
   use Mix.Project
 
-  @version "0.2.0"
+  @version "0.2.1"
   @repo_url "https://github.com/meyercm/base_model"
 
   def project do
@@ -16,6 +16,8 @@ defmodule BaseModel.Mixfile do
       description: "ActiveRecord for Ecto",
       # Docs
       name: "BaseModel",
+      docs: [extras: ["README.md"],
+             main: "readme"],
       # Testing
       preferred_cli_env: [espec: :test],
     ]

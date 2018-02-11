@@ -19,14 +19,15 @@ defmodule BaseModel.Functions do
 
   def find({repo, model}, id, opts) do
     [pk] = model.__schema__(:primary_key)
-    (from x in model,
-     where: field(x, ^pk) == ^id)
+
+    from(x in model, where: field(x, ^pk) == ^id)
     |> add_opts(opts, [:preload])
     |> repo.one
   end
 
   def where({repo, model}, where_clause, opts) do
     where_clause = fix_where_assoc(where_clause, model)
+
     model
     |> add_where(where_clause)
     |> add_opts(opts, [:order_by, :limit, :preload])
@@ -35,6 +36,7 @@ defmodule BaseModel.Functions do
 
   def count({repo, model}, where_clause) do
     where_clause = fix_where_assoc(where_clause, model)
+
     model
     |> add_where(where_clause)
     |> Query.select([], count(1))
@@ -45,9 +47,11 @@ defmodule BaseModel.Functions do
     [pk] = model.__schema__(:primary_key)
     delete(rm, Map.fetch!(struct, pk))
   end
+
   def delete({repo, model}, id) do
     [pk] = model.__schema__(:primary_key)
-    case repo.delete_all(from x in model, where: field(x, ^pk) == ^id) do
+
+    case repo.delete_all(from(x in model, where: field(x, ^pk) == ^id)) do
       {1, _} -> :ok
       {0, _} -> {:error, :not_found}
     end
@@ -55,6 +59,7 @@ defmodule BaseModel.Functions do
 
   def delete_where({repo, model}, where_clause) do
     where_clause = fix_where_assoc(where_clause, model)
+
     model
     |> add_where(where_clause)
     |> repo.delete_all
@@ -73,13 +78,15 @@ defmodule BaseModel.Functions do
 
   def update({repo, model}, model_struct, params) do
     params = fix_params_assoc(params, model)
+
     model.update_changeset(model_struct, params)
     |> repo.update()
   end
 
   def update_where({repo, model}, where_clause, params) do
     where_clause = fix_where_assoc(where_clause, model)
-    params = fix_params_assoc(params, model) |> Map.to_list
+    params = fix_params_assoc(params, model) |> Map.to_list()
+
     model
     |> add_where(where_clause)
     |> repo.update_all(set: params)
@@ -89,14 +96,17 @@ defmodule BaseModel.Functions do
   end
 
   def first(repo_mod, where_clause, opts) do
-    case where(repo_mod, where_clause, Keyword.merge(opts, [limit: 1])) do
+    case where(repo_mod, where_clause, Keyword.merge(opts, limit: 1)) do
       [] -> nil
       [result] -> result
     end
   end
+
   def first_or_create(repo_mod, where_clause, opts) do
-    case where(repo_mod, where_clause, [{:limit, 1}|opts]) do
-      [result] -> result
+    case where(repo_mod, where_clause, [{:limit, 1} | opts]) do
+      [result] ->
+        result
+
       [] ->
         {:ok, result} = create(repo_mod, where_clause)
         result
@@ -119,7 +129,8 @@ defmodule BaseModel.Functions do
 
   # Internal functions
   def add_opts(query, [], _allowed_opts), do: query
-  def add_opts(query, [{opt, opt_val}|rest], allowed_opts) do
+
+  def add_opts(query, [{opt, opt_val} | rest], allowed_opts) do
     if opt in allowed_opts do
       apply_opt(query, opt, opt_val)
     else
@@ -127,6 +138,7 @@ defmodule BaseModel.Functions do
     end
     |> add_opts(rest, allowed_opts)
   end
+
   def apply_opt(query, :order_by, order_by), do: Query.order_by(query, ^order_by)
   def apply_opt(query, :limit, limit), do: Query.limit(query, ^limit)
   def apply_opt(query, :preload, preload), do: Query.preload(query, ^preload)
@@ -137,7 +149,9 @@ defmodule BaseModel.Functions do
         # only create keys for `belongs_to`, because this table has the foreign key
         ~M{%BelongsTo owner_key, related_key} ->
           {owner_key, Map.get(value, related_key)}
-        _ -> {field, value}
+
+        _ ->
+          {field, value}
       end
     end
   end
@@ -145,16 +159,17 @@ defmodule BaseModel.Functions do
   # params needs to be a map
   def fix_params_assoc(params, model) do
     fix_where_assoc(params, model)
-    |> Map.new
+    |> Map.new()
   end
 
   def add_where(query, []), do: query
-  def add_where(query, [{f, nil}|rest]) do
-    (from x in query,
-     where: is_nil(field(x, ^f)))
+
+  def add_where(query, [{f, nil} | rest]) do
+    from(x in query, where: is_nil(field(x, ^f)))
     |> add_where(rest)
   end
-  def add_where(query, [{f, v}|rest]) do
+
+  def add_where(query, [{f, v} | rest]) do
     query
     |> Query.where(^[{f, v}])
     |> add_where(rest)
