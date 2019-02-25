@@ -5,12 +5,11 @@ use Mix.Config
 config :example_app, ecto_repos: [ExampleApp.Repo]
 
 config :example_app, ExampleApp.Repo,
-  adapter: Ecto.Adapters.Postgres,
   database: "basemodel_example_1",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox,
   port: "5432",
-  loggers: [],
+  loggers: false,
   garbage_key: :ok
 
 
