@@ -38,7 +38,7 @@ defmodule BaseModel.Mixfile do
   defp deps do
     [
       {:espec, "~> 1.4", only: :test},
-      {:ecto, "~> 2.1"},
+      {:ecto_sql, "~> 3.0"},
       {:shorter_maps, "~> 2.0"},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},

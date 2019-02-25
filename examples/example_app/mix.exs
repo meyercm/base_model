@@ -24,7 +24,7 @@ defmodule ExampleApp.Mixfile do
   defp deps do
     [
       {:postgrex, ">= 0.0.0"},
-      {:ecto, "~> 2.1"},
+      {:ecto, "~> 3.0"},
       {:base_model, path: "../.."},
       {:shorter_maps, "~> 2.1"},
       #{:espec, "~> 1.4"},
